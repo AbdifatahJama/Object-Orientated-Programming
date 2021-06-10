@@ -165,7 +165,30 @@ class RocketBoard:
     '''
     self.listofRockets[key].altitude = value
     
- 
+  def __str__(self):
+    pass
+    
+  def __len__(self):
+    '''len dunder method find the legnth of the list which is defined by the user
+    '''
+    count = 0
+    for i in self.listofRockets:
+      count+=1
+    return count
+    
+  @staticmethod
+  def get_distance(rocket1,rocket2):
+    '''Statatic method uses no reference to object or class such as 'self' or 'cls'
+      Arguments are not linked to class
+      
+      When a calling a static method we use the ClassName not the object,instance of the class.
+    '''
+    y = abs(rocket1.altitude - rocket2.altitude)
+    x = abs(rocket1.x - rocket2.x)
+    return sqrt(x^2 + y^2)
+  
+
+    
 # We can instatiate rocketboards which will invoke the __init__ method everytime an object is created
 # However,we cannot access the atributes of the rocketboard as within the rocket class there is no self.attribute refering to the rocketboard object
 
@@ -185,6 +208,10 @@ If classes are completely different and not linked you must/good practise to mak
 '''__getitem__ and __setitem__ dunder methods set and get values within lists dictionaries and arrays
 '''
 
+print()
+b1 = RocketBoard(10)
+print(len(b1)) # this code triggers the len method
+  
 
 
   
