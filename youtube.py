@@ -89,16 +89,18 @@ class Youtube:
         print('Succesfully added')
         
       else:
-        for item in self.playlist.playlist:
-          if url == item[0].link:
-            print(item[0].title + ' ' + 'already in playlist, so cannnot be added')
-            
-          else:
-            v = Video(url) # creates a video object
-            generate_3_digit_code = random.randint(100,999)
-            array = (v,generate_3_digit_code)
-            self.playlist.playlist.append(array) # appends video object to video player playlist
-            print('Succesfully added')
+        url_list = [vid.link for vid,code in self.playlist.playlist]
+        if url in url_list:
+          v = Video(url)
+          print(v.title + ' ' +  'already in playlist, so cannnot be added')
+        
+                    
+        elif url not in url_list:
+          v = Video(url) # creates a video object
+          generate_3_digit_code = random.randint(100,999)
+          array = (v,generate_3_digit_code)
+          self.playlist.playlist.append(array) # appends video object to video player playlist
+          print('Succesfully added')
       
     else:
       print('Invalid Youtube URL')
@@ -145,7 +147,7 @@ class Video():
       session = HTMLSession() # initialise a HTML session
       response = session.get(link)  # gets html session
       response.html.render(sleep=1) 
-      soup = bs(response.html.html, "html.parser") # uses beutiful soup libary to parse html
+      soup = bs(response.html.html, "lxml") # uses beutiful soup libary to parse html
       title = soup.find("h1").text
       views = soup.find("span", attrs={"class": "view-count"}).text
       self.title = title
@@ -166,15 +168,21 @@ class Video():
 
 
 
-you = Youtube()
-you.addToPlaylist('https://www.youtube.com/watch?v=KmeCuoM1hfY&list=RDMM&start_radio=1')
-you.addToPlaylist('https://www.youtube.com/watch?v=RaKxMVBwxRc&list=RDMM&index=2')
-you.addToPlaylist('https://www.youtube.com/watch?v=MHryuYVyHhk&list=RDMM&index=3')
-you.addToPlaylist('https://www.youtube.com/watch?v=-QiovlGJi_U&list=RDMM&index=4')
-you.addToPlaylist('https://www.youtube.com/watch?v=XDiOo4ayKEQ&list=RDMM&index=5')
-you.addToPlaylist('https://www.youtube.com/watch?v=np9Ub1LilKU&list=RDMM&index=7')
-you.addToPlaylist('https://www.youtube.com/watch?v=6am8HtXsrHo&list=RDMM&index=8')
-you.addToPlaylist('https://www.youtube.com/watch?v=U2oF0TsyP_Y')
+yous = Youtube()
 
+yous.addToPlaylist('https://www.youtube.com/watch?v=KmeCuoM1hfY&list=RDMM&start_radio=1')
+yous.addToPlaylist('https://www.youtube.com/watch?v=RaKxMVBwxRc&list=RDMM&index=2')
+yous.addToPlaylist('https://www.youtube.com/watch?v=MHryuYVyHhk&list=RDMM&index=3')
+yous.addToPlaylist('https://www.youtube.com/watch?v=-QiovlGJi_U&list=RDMM&index=4')
+yous.addToPlaylist('https://www.youtube.com/watch?v=XDiOo4ayKEQ&list=RDMM&index=5')
+yous.addToPlaylist('https://www.youtube.com/watch?v=np9Ub1LilKU&list=RDMM&index=7')
+yous.addToPlaylist('https://www.youtube.com/watch?v=6am8HtXsrHo&list=RDMM&index=8')
+yous.addToPlaylist('https://www.youtube.com/watch?v=U2oF0TsyP_Y')
 
+print(yous.playlist.playlist)
+
+yous.deleteFromPlaylist()
+
+v = Video('https://www.youtube.com/watch?v=MHryuYVyHhk&list=RDMM&index=3')
+print(v.title)
 
