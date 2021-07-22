@@ -28,6 +28,10 @@ initial = {
   'api_key':'RVMUSLYVL9TZ0R55',
   'money':2000
 }
+
+def get_response(ticker):
+  pass
+
 class StockHolder:
   '''Holds all five stocks'''
   def __init__(self,ticker1 = ' ',ticker2 = ' ',ticker3 = ' ',ticker4 = ' ',ticker5 = ' ',totalinvestment = 1000):
@@ -68,7 +72,7 @@ class Stock:
     self.buyPrice = 0
     self.sellPrice = 0
     self.final = 0
-  def plot(self):
+  def plot(self): # Need to refactor 
     date = datetime.now()
     date = date.strftime('%Y-%m-%d %H:%M:00')
     openPrice = self.data[0][date]['1. open'] # gets the open price of each stock when a GET request is requested each one minute
@@ -93,65 +97,68 @@ class Stock:
       
       
   
-  def buy(self):
+  def buy(self,data,date): # Need to refactor
     '''Buys stock for 200 dollars at that right time'''
-    if self.status == 'DO NOT OWN':
-      buyPrice = initial['money']//5 # 200 dollars
-      date = datetime.now()
-      date = date.strftime('%Y-%m-%d %H:%M:00')
+    if self.status == 'DO NOT OWN': 
       try:
-        self.buyPrice = self.data[0][date]['1. open']
-        self.status = self.ticker + ' ' + '(owned)'
+        self.buyPrice = data[date]['1. open']
+        self.status = 'Owned'
         print(self.status)
         
       except:
-        print('Cannot buy')
+        print('Cannot buy - EXCEPTION')
       
     else:
       print('Already owned-bot can only sell now at the right time')
   
-  def sell(self):
+  def sell(self,data,date): # refactor
     '''Sells stock when the sitution right based on the strategy being used'''
     try:
-      date = datetime.now()
-      date = date.strftime('%Y-%m-%d %H:%M:00')
-      self.sellPrice = self.data[0][date]['1. open']
-      '''Now find percentage difference between sell price and buy price'''
-      diff = ((float(self.sellPrice) - float(self.buyPrice))/float(self.buyPrice))
-      moneyMadeorLost = self.investment*diff
-      self.final = self.investment+moneyMadeorLost
-      self.status = 'Sold'
-  
+      if self.status == 'Owned':
+        
+        self.sellPrice = data[date]['1. open']
+        '''Now find percentage difference between sell price and buy price'''
+        diff = ((float(self.sellPrice) - float(self.buyPrice))/float(self.buyPrice))
+        moneyMadeorLost = self.investment*diff
+        self.final = self.investment+moneyMadeorLost
+        self.status = 'Sold'
+        
+      else:
+        print('You do not own' + ' ' + self.ticker + ' ' + 'as you do not own it')
+      
     except:
-      pass
+      print('NOT SOLD - EXCEPTION')
   
-  def scan(self):
+  def scan(self): # Refactor change dates so it mirrors time in new york(Eastern)
     '''Scans the price of each stock every minute '''
+    ts = TimeSeries(API_KEY)
+    data = ts.get_intraday(self.ticker,interval='1min',outputsize='full')
+    data = data[0]
     try:
-      date = datetime.now()
+      date = datetime.now() - timedelta(hours=5,days=1)
       date = date.strftime('%Y-%m-%d %H:%M:00')
-      print(self.ticker + ' current price:',self.date[0][date]['1. open'])
-      diff = self.percentages(date) #Need to refactor 
-      if diff<=0.01:
-        self.buy()
+      print(self.ticker + ' current price:'+ ' ' + data[date]['1. open'])
+      diff = self.percentages(data,date) #Need to refactor 
+      if diff>0.01 and diff<0.02:
+        self.buy(data,date)
         print(self.ticker + ' ' + 'bought')
         
       
       elif diff>=0.02 and self.status ==  self.ticker + ' ' + '(owned)':
-        self.sell()
+        self.sell(date,date)
         print(self.ticker + ' ' + 'sold')
       else:
-        print(self.ticker + ':Percentage difference-',self.percentages() )
+        print(self.ticker + ':Percentage difference-',self.percentages(data,date) )
     except:
       print(self.ticker + ':','Price not found')
   
-  def percentages(self,date):
+  def percentages(self,data,date):
     '''Compares percentages off stock every minute with previous minute. This percentage is being used to figure out if stock should be sold or bought'''
     try:
-      OpenNow = self.data[0][date]['1. open']
+      OpenNow = data[date]['1. open']
       DateBefore = datetime.strptime(date,'%Y-%m-%d %H:%M:%S') - timedelta(minutes=1)
       DateBefore = DateBefore.strftime('%Y-%m-%d %H:%M:00')
-      OpenBefore = self.data[0][DateBefore]['1. open']
+      OpenBefore = data[DateBefore]['1. open']
       # print('Open Before:',OpenBefore)
       diff = ((float(OpenNow) - float(OpenBefore))/float(OpenBefore))
       return diff
@@ -174,8 +181,14 @@ holder = StockHolder('GDX','AMD','TSLA','ROKU','AMC',2000)
 holder.run()
 
 
-  
 
+# ts = TimeSeries(key = 'RVMUSLYVL9TZ0R55')
+# data = ts.get_intraday('IBM',interval='1min',outputsize='full')
+# print(data[0]['2021-07-21 19:43:00'])
+  
+  
+  
+  
 
 
 
